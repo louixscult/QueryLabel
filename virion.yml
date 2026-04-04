@@ -1,0 +1,6 @@
+name: QueryLabel
+description: 'A MCPE query label for PHP (virion version)'
+version: 1.0.0
+antigen: louixscult\querylabel
+api: [2.0.0, 3.0.0, 4.0.0, 5.0.0]
+authors: ['louixscult']

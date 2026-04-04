@@ -1,0 +1,6 @@
+---
+projects:
+  QueryLabel:
+    type: library
+    model: virion
+...
