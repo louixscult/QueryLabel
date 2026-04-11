@@ -18,7 +18,11 @@ declare (strict_types=1);
  *
  */
 
+<<<<<<< HEAD
 namespace louisxcult\querylabel\exception;
+=======
+namespace louixscult\querylabel\exception;
+>>>>>>> b67dd12 (final fix)
 
 use RuntimeException;
 

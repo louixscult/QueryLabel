@@ -27,75 +27,53 @@ use JsonSerializable;
  */
 class ServerQuery implements JsonSerializable
 {
-
-    /** @var string */
-    private $gameName;
-
-    /** @var string */
-    private $hostName;
-
-    /** @var string */
-    private $protocol;
-
-    /** @var string */
-    private $version;
-
-    /** @var integer */
-    private $playersCount;
-
-    /** @var integer */
-    private $maxPlayersCount;
-
-    /** @var string */
-    private $serverId;
-
-    /** @var string */
-    private $worldName;
-
-    /** @var string */
-    private $gameMode;
-
-    /** @var boolean */
-    private $nintendoLimited;
-
-    /** @var integer */
-    private $ipV4Port;
-
-    /** @var integer */
-    private $ipV6Port;
-
-    /** @var string */
-    private $serverExtra;
+	
+	private string $gameName;
+    private string $hostName;
+    private int $protocol;
+    private string $version;
+    private int $playersCount;
+    private int $maxPlayersCount;
+    private int $serverId;
+    private string $worldName;
+    private string $gameMode;
+    private bool $nintendoLimited;
+    private int $ipV4Port;
+    private int $ipV6Port;
+    private bool $isHardcore;
+    private string $serverExtra;
 
     public function __construct(
         string $gameName,
         string $hostName,
         string $protocol,
         string $version,
-        int $playersCount,
-        int $maxPlayersCount,
+        string $playersCount,
+        string $maxPlayersCount,
         string $serverId,
         string $worldName,
         string $gameMode,
-        int $nintendoLimited,
-        int $ipV4Port,
-        int $ipV6Port,
+        string $nintendoLimited,
+        string $ipV4Port,
+        string $ipV6Port,
+        string $isHardcore,
         string $serverExtra
     )
     {
-        $this->gameName        =               $gameName;
-        $this->hostName        =               $hostName;
-        $this->protocol        =               $protocol;
-        $this->version         =                $version;
-        $this->playersCount    =           $playersCount;
-        $this->maxPlayersCount =        $maxPlayersCount;
-        $this->serverId        =               $serverId;
-        $this->worldName       =              $worldName;
-        $this->gameMode        =               $gameMode;
-        $this->nintendoLimited = (bool) $nintendoLimited;
-        $this->ipV4Port        =               $ipV4Port;
-        $this->ipV6Port        =               $ipV6Port;
-        $this->serverExtra     =            $serverExtra;
+        $this->gameName        =                       $gameName;
+        $this->hostName        =                       $hostName;
+        $this->protocol        = (int)                 $protocol;
+        $this->version         =                        $version;
+        $this->playersCount    = (int)             $playersCount;
+        $this->maxPlayersCount = (int)          $maxPlayersCount;
+        $this->serverId        =                       $serverId;
+        $this->worldName       =                      $worldName;
+        $this->gameMode        =                       $gameMode;
+        $this->nintendoLimited = (bool) ((int) $nintendoLimited);
+        $this->ipV4Port        = (int)                 $ipV4Port;
+        $this->ipV6Port        = (int)                 $ipV6Port;
+        $this->isHardcore      = (bool)      ((int) $isHardcore);
+        $this->serverExtra     =                    $serverExtra;
     }
 
     /**
@@ -120,10 +98,10 @@ class ServerQuery implements JsonSerializable
 
     /**
      * Get server MCPE protocol
-     *
-     * @return string
+     * 
+     * @return integer
      */
-    public function getProtocol(): string
+    public function getProtocol(): int
     {
         return $this->protocol;
     }
@@ -213,9 +191,19 @@ class ServerQuery implements JsonSerializable
      *
      * @return int
      */
-    public function getIPVPort(): int
+    public function getIPV6Port(): int
     {
         return $this->ipV6Port;
+    }
+    
+    /**
+     * Verify if is hardcore
+     * 
+     * @return bool
+     */
+    public function isHardcore(): bool
+    {
+    	return $this->isHardcore;
     }
 
     /**
@@ -231,7 +219,7 @@ class ServerQuery implements JsonSerializable
     /**
      * Serializable server query
      *
-     * @return array{game_name:string,host_name:string,protocol:string,version:string,players_count:integer,max_players_count:integer,server_id:string,world_name:string,game_mode:string,nintendo_limited:int,ports:array{ipv4:string,ipv6:string},server_extra:string}
+     * @return array{game_name:string,host_name:string,protocol:string,version:string,players_count:integer,max_players_count:integer,server_id:string,world_name:string,game_mode:string,nintendo_limited:int,ports:array{ipv4:string,ipv6:string},isHardcore:bool,server_extra:string}
      */
     public function jsonSerialize(): mixed
     {
@@ -245,11 +233,12 @@ class ServerQuery implements JsonSerializable
             'server_id'=> $this->serverId,
             'world_name' => $this->worldName,
             'game_mode' => $this->gameMode,
-            'nintendo_limited'=> (int) $this->nintendoLimited,
+            'nintendo_limited'=> $this->nintendoLimited,
             'ports' => [
                 'ipv4' => $this->ipV4Port,
                 'ipv6' =>  $this->ipV6Port
             ],
+            'isHardcore' => $this->isHardcore,
             'server_extra' => $this->serverExtra
         ];
     }

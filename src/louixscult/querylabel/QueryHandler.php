@@ -20,9 +20,21 @@ declare (strict_types=1);
 
 namespace louixscult\querylabel;
 
-use louisxcult\querylabel\exception\QueryException;
+use louixscult\querylabel\exception\QueryException;
 use louixscult\querylabel\query\ServerQuery;
 use ReflectionClass;
+use function explode;
+use function fclose;
+use function fread;
+use function fsockopen;
+use function fwrite;
+use function pack;
+use function str_starts_with;
+use function stream_set_blocking;
+use function stream_set_timeout;
+use function strlen;
+use function substr;
+use function time;
 
 /**
  * Manage queries with handler
@@ -45,42 +57,36 @@ final class QueryHandler
      */
     public static function query(
         string $host,
-        string $port,
+        int $port,
         int $timeout = 5
-    )
-    {
-        $socket = @fsockopen('udp://' . $host, $port, $errno, $errstr, $timeout);
+    ) {
+    	$socket = @fsockopen('udp://' . $host, (int)$port, $errno, $errstr, $timeout);
 
-		if ($errno !== 0 and !$socket)
-        {
-			fclose($socket);
-			throw new QueryException($errstr, $errno);
-		} else if (!$socket)
-        {
-			throw new QueryException($errstr, $errno);
+		if (!$socket)
+		{
+		    throw new QueryException($errstr, $errno);
 		}
-
+		
 		stream_set_timeout($socket, $timeout);
-		stream_set_blocking($socket, true);
-
-        $OFFLINE_MESSAGE_DATA_ID = pack('c*', ...self::OFFLINE_DATA);
-		$command = pack('cQ', 0x01, time());
-		$command .= $OFFLINE_MESSAGE_DATA_ID;
-		$command .= pack('Q', 2);
-		$length = strlen($command);
-
-		if ($length !== fwrite($socket, $command, $length))
-        {
-			throw new QueryException("Failed to write on socket.", E_WARNING);
-		}
-
-		stream_set_blocking($socket, false);
+		
+		$offline = pack('c*', ...self::OFFLINE_DATA);
+		$time = (int)(microtime(true) * 1000);
+		$guid = random_int(1, PHP_INT_MAX);
+		
+		$command = pack('cQ', 0x01, $time);
+		$command .= $offline;
+		$command .= pack('Q', $guid);
+		
+		fwrite($socket, $command);
+		
 		$read = [$socket];
 		$write = $except = [];
+		
+		$result = stream_select($read, $write, $except, $timeout, 0);
 
-		$result = stream_select($read, $write, $except, $timeout);
+		var_dump($result);
 
-		if (!$result)
+		if ($result === false)
         {
 			throw new QueryException("select() call failed", E_WARNING);
 		}
@@ -104,8 +110,7 @@ final class QueryHandler
         {
 			throw new QueryException("First byte is not ID_UNCONNECTED_PONG.", E_WARNING);
 		}
-
-		if (substr($data, 17, 16) !== $OFFLINE_MESSAGE_DATA_ID)
+		if (substr($data, 17, 16) !== $offline)
         {
 			throw new QueryException("Magic bytes do not match.");
 		}
@@ -115,8 +120,9 @@ final class QueryHandler
 
         $reflection = new ReflectionClass(ServerQuery::class);
         $constructor = $reflection->getConstructor();
+        $params = $constructor->getNumberOfParameters();
 
-        if (count($data) > $constructor->getNumberOfParameters() or count($data) < $constructor->getNumberOfParameters())
+        if (count($data) !== $params)
         {
             throw new QueryException("The query data is greater or less than the class values.");
         }
