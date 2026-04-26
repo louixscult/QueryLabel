@@ -1,0 +1,9 @@
+---
+branches:
+- master
+projects:
+  querylabel:
+    path: ""
+    model: virion
+    type: library
+...
