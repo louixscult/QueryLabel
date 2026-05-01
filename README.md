@@ -27,11 +27,11 @@ Example of use in poggit.yml file:
 ---
 build-by-default: true
 branches:
-- yourbranch
+- yourpluginbranch
 projects:
   YourProjectName:
     libs:
-      - src: louixscult\querylabel
+      - src: louixscult\QueryLabel
         version: ^1.0.0
     path: ''
 ...
